@@ -23,7 +23,7 @@ class RSID
     version:      0x04, data_offset:  0x06,
     load_address: 0x08, init_address: 0x0A,
     play_address: 0x0C, songs:        0x0E,
-    flags:        0x76
+    flags:        0x76, start_song:   0x10,
   }
 
   strings.each do |name, offset|
@@ -70,6 +70,19 @@ class RSID
 
   def ends
     @bytes.size - data_offset + load
+  end
+
+  def speed
+    (word_at(0x12) << 16) + word_at(0x14)
+  end
+
+  def sid2_address
+    byte = @bytes[0x7A]
+    if byte.even? && ((0x42..0x7E).include?(byte) || (0xE0..0xFE).include?(byte))
+      0xD000 + (byte << 8)
+    else
+      nil
+    end
   end
 
   private
